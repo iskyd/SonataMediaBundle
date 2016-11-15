@@ -64,7 +64,7 @@ class MediaController extends Controller
         $response = $this->getProvider($media)->getDownloadResponse($media, $format, $this->get('sonata.media.pool')->getDownloadMode($media));
 
         if ($response instanceof BinaryFileResponse) {
-            $response->prepare($this->get('request'));
+            $response->prepare($this->get('request_stack')->getCurrentRequest());
         }
 
         return $response;
@@ -113,7 +113,7 @@ class MediaController extends Controller
             throw new NotFoundHttpException();
         }
 
-        $targetPath = $this->get('liip_imagine.cache.manager')->resolve($this->get('request'), $path, $filter);
+        $targetPath = $this->get('liip_imagine.cache.manager')->resolve($this->get('request_stack')->getCurrentRequest(), $path, $filter);
 
         if ($targetPath instanceof Response) {
             return $targetPath;
@@ -134,7 +134,7 @@ class MediaController extends Controller
 
         $image = $this->get('liip_imagine')->open($tmpFile);
 
-        $response = $this->get('liip_imagine.filter.manager')->get($this->get('request'), $filter, $image, $path);
+        $response = $this->get('liip_imagine.filter.manager')->get($this->get('request_stack')->getCurrentRequest(), $filter, $image, $path);
 
         if ($targetPath) {
             $response = $this->get('liip_imagine.cache.manager')->store($response, $targetPath, $filter);
